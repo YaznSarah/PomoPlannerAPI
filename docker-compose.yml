@@ -4,15 +4,17 @@
 version: '2.4'
 services:
   db:
-    image: datajoint/mysql:5.7
-    # image: datajoint/mysql:8.0
+    image: mysql:5
     environment:
       - MYSQL_ROOT_PASSWORD=simple
-      # - DATAJOINT_DATABASE_CONFIG_MONITOR=FALSE # Enable MySQL config monitoring, auto reload
     ports:
       - "3306:3306"
     volumes:
-      ## persist data across docker-compose up/down
       - ./data:/var/lib/mysql
-      ## modify MySQL config
-      # - ./config/my.cnf:/etc/mysql/my.cnf
+      - ./sql:/docker-entrypoint-initdb.d/
+  web-server:
+    build:
+      dockerfile: ./
+      context: .
+    ports: 
+      - "80:3000"
