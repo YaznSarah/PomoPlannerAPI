@@ -12,9 +12,17 @@ services:
     volumes:
       - ./data:/var/lib/mysql
       - ./sql:/docker-entrypoint-initdb.d/
+    networks:
+      - pomo
   web-server:
     build:
-      dockerfile: ./
+      dockerfile: ./Dockerfile
       context: .
     ports: 
       - "80:3000"
+    networks:
+      - pomo
+
+networks:
+    pomo:
+      driver: bridge

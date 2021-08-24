@@ -8,7 +8,7 @@ let con;
 (async () => {
     try {
         con = await mysql.createConnection({
-            host: "localhost",
+            host: "db",
             user: "root",
             password: "simple",
             database: "planner"
