@@ -21,6 +21,7 @@ let con;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'))
 
 
 app.get('/tasks', async (req, res) => {
