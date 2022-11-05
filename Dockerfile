@@ -7,6 +7,8 @@ COPY ["package.json", "package-lock.json*", "./"]
 
 RUN npm install --production
 
+RUN npm install pm2 -g
+
 COPY . .
 
-CMD [ "pm2", "start", "index.js" ]
+CMD [ "pm2-runtime", "index.js" ]

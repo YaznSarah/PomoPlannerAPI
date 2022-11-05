@@ -4,11 +4,10 @@ const port = 3000;
 const app = express();
 const mysql = require('promise-mysql');
 
-let con;
 (async () => {
     try {
         con = await mysql.createConnection({
-            host: "db",
+            host: "localhost",
             user: "root",
             password: "simple",
             database: "planner"
@@ -20,16 +19,21 @@ let con;
 })();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json())
 app.use(express.static('public'))
-
 
 app.get('/tasks', async (req, res) => {
     const rows = await con.query("SELECT * FROM tasks");
     res.json(rows);
 });
 
-app.get('/boards', async (req, res) => {
+app.get('/user', async (req, res) => {
+    const rows = await con.query("SELECT * FROM user");
+    res.json(rows);
+});
+
+
+app.get('/boards/', async (req, res) => {
     const rows = await con.query("SELECT * FROM boards");
     res.json(rows);
 });
@@ -41,6 +45,27 @@ app.get('/boards/:id', async (req, res) => {
         board: board[0],
         tasks: tasks
     });
+});
+
+app.post('/register', async (req, res) => {
+    if (req.body.email == undefined) {
+        return res.status(400).json({
+            "error": "email missing"
+        });
+    }
+    let sql = `INSERT INTO
+                    user
+                SET
+                    username = ?,
+                    password = ?,
+                    firstName = ?,
+                    lastName = ?,
+                    email = ?`;
+    const values = [req.body.username, req.body.password, req.body.firstName, req.body.lastName, req.body.email];
+    const result = await con.query(sql, values);
+    req.body.id = result.insertId;
+    res.json(req.body);
+
 });
 
 app.post('/tasks', async (req, res) => {
@@ -114,4 +139,4 @@ app.delete('/boards/:id', (req, res) => {
     console.log(sql)
     res.json(req.body);
 })
-const server = app.listen(3000);
+const server = app.listen(port);
