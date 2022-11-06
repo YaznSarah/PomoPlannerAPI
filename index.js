@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors')
+const fs = require('fs');
 const port = 3000;
 const app = express();
 const mysql = require('promise-mysql');
@@ -10,7 +11,8 @@ const mysql = require('promise-mysql');
             host: "localhost",
             user: "root",
             password: "simple",
-            database: "planner"
+            database: "planner",
+            multipleStatements: true
         });
     } catch (e) {
         console.log(e);
@@ -48,24 +50,50 @@ app.get('/boards/:id', async (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    if (req.body.email == undefined) {
-        return res.status(400).json({
-            "error": "email missing"
-        });
+    const values = [req.body.username, req.body.password, req.body.firstName, req.body.lastName, req.body.email];
+    let emptyValues = values.filter(e => e.length === 0);
+    if(emptyValues.length > 0){
+        return res.status(400).send();
     }
+
     let sql = `INSERT INTO
                     user
                 SET
                     username = ?,
-                    password = ?,
+                    password = SHA(?),
                     firstName = ?,
                     lastName = ?,
                     email = ?`;
-    const values = [req.body.username, req.body.password, req.body.firstName, req.body.lastName, req.body.email];
-    const result = await con.query(sql, values);
-    req.body.id = result.insertId;
-    res.json(req.body);
+    try {
+        const result = await con.query(sql, values);
+        req.body.id = result.insertId;
+        res.json(req.body);
+    } catch (e){
+        if(e.code == 'ER_DUP_ENTRY'){
+            return res.status(401).send();
+        }
+        return res.status(500).send();
+        console.error(e);ß
+    }
 
+
+});
+
+
+app.post('/login', async (req, res) => {
+    let sql = `SELECT 
+                    username 
+                FROM 
+                    user 
+                WHERE
+                    email = ?
+                AND
+                    password = SHA(?)
+                LIMIT 1`;
+
+    const values = [req.body.email, req.body.password];
+    const rows = await con.query(sql, values);
+    res.json(rows);
 });
 
 app.post('/tasks', async (req, res) => {
@@ -131,12 +159,15 @@ app.delete('/tasks/:id', (req, res) => {
     res.json(req.body);
 });
 
-app.delete('/boards/:id', (req, res) => {
-    let sql = `DELETE FROM
-                    boards
-                WHERE id = ?`;
-    con.query(sql, [req.params.id]);
+app.get('/initialize', (req, res) => {
+    const file = fs.readFileSync("./sql/schema.sql").toString();
+    let sql = file.split("\n").join("");
+    console.log(con.query(sql));
     console.log(sql)
-    res.json(req.body);
-})
+    res.json(
+
+
+    );
+});
+
 const server = app.listen(port);

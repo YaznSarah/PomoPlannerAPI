@@ -1,5 +1,5 @@
+DROP DATABASE planner;
 CREATE DATABASE planner;
-use planner;
 
 CREATE TABLE planner.tasks (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -17,4 +17,13 @@ CREATE TABLE planner.boards (
   `title` varchar(255) NOT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
+);
+
+CREATE TABLE planner.user (
+    `username` varchar(255) NOT NULL,
+    `email` varchar(255) NOT NULL UNIQUE ,
+    `password` varchar(255) NOT NULL,
+    `firstName` varchar(255) NOT NULL,
+    `lastName` varchar(255) NOT NULL,
+    PRIMARY KEY (`username`)
 );
