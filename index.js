@@ -118,6 +118,29 @@ app.post('/tasks', async (req, res) => {
     res.json(req.body);
 });
 
+app.post('/blogs', async (req, res) => {
+     let sql = `INSERT INTO
+                    blogs
+                SET
+                    blogid = ?,
+                    subject = ?,
+                    description = ?,
+                    created_by = ?,
+                    pdate  = NOW()`;
+    let tagSql = 
+                `INSERT INTO 
+                    blogstags
+                 SET
+                    blogid = ?,
+                    tag = ?`;
+    req.body.blogId = result.insertId;
+    const values = [req.body.subject, req.body.description, req.body.createdBy, req.body, req.body.createdBy];
+    const tagValues = [req.body.tags]
+    const result = await con.query(sql, values)
+    const tagResult = await con.query(sql, tagValues)
+    res.json(req.body)
+});
+
 app.post('/boards', async (req, res) => {
     if (req.body.title == undefined) {
         return res.status(400).json({
