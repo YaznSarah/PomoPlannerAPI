@@ -34,9 +34,13 @@ app.get('/user', async (req, res) => {
     res.json(rows);
 });
 
-
 app.get('/boards/', async (req, res) => {
     const rows = await con.query("SELECT * FROM boards");
+    res.json(rows);
+});
+
+app.get('/blogs', async (req, res) => {
+    const rows = await con.query("SELECT * FROM blogs");
     res.json(rows);
 });
 
@@ -75,10 +79,7 @@ app.post('/register', async (req, res) => {
         return res.status(500).send();
         console.error(e);ß
     }
-
-
 });
-
 
 app.post('/login', async (req, res) => {
     let sql = `SELECT 
@@ -165,8 +166,6 @@ app.get('/initialize', (req, res) => {
     console.log(con.query(sql));
     console.log(sql)
     res.json(
-
-
     );
 });
 
