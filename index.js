@@ -44,6 +44,16 @@ app.get('/blogs', async (req, res) => {
     res.json(rows);
 });
 
+app.get('/blogstags', async (req, res) => {
+    const rows = await con.query("SELECT * FROM blogstags");
+    res.json(rows);
+});
+
+app.get('/comments', async (req, res) => {
+    const rows = await con.query("SELECT * FROM comments");
+    res.json(rows);
+});
+
 app.get('/boards/:id', async (req, res) => {
     const board = await con.query("SELECT * from boards WHERE id = ? LIMIT 1", [req.params.id]);
     const tasks = await con.query("SELECT * from tasks WHERE board_id = ?", [req.params.id]);
@@ -114,7 +124,6 @@ app.post('/tasks', async (req, res) => {
                     date_created = NOW()`;
     const values = [req.body.boardId, req.body.title, req.body.status, req.body.description, req.body.points];
     const result = await con.query(sql, values);
-    req.body.id = result.insertId;
     res.json(req.body);
 });
 
@@ -122,24 +131,41 @@ app.post('/blogs', async (req, res) => {
      let sql = `INSERT INTO
                     blogs
                 SET
-                    blogid = ?,
                     subject = ?,
                     description = ?,
                     created_by = ?,
                     pdate  = NOW()`;
-    let tagSql = 
-                `INSERT INTO 
-                    blogstags
-                 SET
-                    blogid = ?,
-                    tag = ?`;
-    req.body.blogId = result.insertId;
-    const values = [req.body.subject, req.body.description, req.body.createdBy, req.body, req.body.createdBy];
-    const tagValues = [req.body.tags]
+    const values = [req.body.subject, req.body.description, req.body.created_by];
     const result = await con.query(sql, values)
-    const tagResult = await con.query(sql, tagValues)
     res.json(req.body)
 });
+
+app.post('/blogstags', async (req, res) => {
+   let sql = 
+               `INSERT INTO 
+                   blogstags
+                SET
+                   blogid = ?,
+                   tag = ?`;
+   const values = [req.body.blogid, req.body.tag]
+   const result = await con.query(sql, values)
+   res.json(req.body)
+});
+
+app.post('/comments', async (req, res) => {
+    let sql = 
+                `INSERT INTO 
+                    comments
+                 SET
+                    sentiment = ?,
+                    description = ?,
+                    posted_by = ?,
+                    cdate = NOW(),
+                    blogid = ?,`;
+    const values = [req.body.sentiment, req.body.description, req.body.postedBy, req.body.blogid]
+    const result = await con.query(sql, values)
+    res.json(req.body)
+ });
 
 app.post('/boards', async (req, res) => {
     if (req.body.title == undefined) {
