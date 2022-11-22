@@ -54,6 +54,17 @@ app.get('/comments', async (req, res) => {
     res.json(rows);
 });
 
+app.get('/blogs/:id', async (req, res) => {
+    const blog = await con.query("SELECT * from blogs WHERE blogid = ? LIMIT 1", [req.params.id]);
+    const comments = await con.query("SELECT * from comments WHERE blogid = ?", [req.params.id]);
+    const tags = await con.query("SELECT * from blogstags WHERE blogid = ?", [req.params.id]);
+    res.json({
+        blog: blog[0],
+        comments: comments,
+        tags: tags
+    });
+});
+
 app.get('/boards/:id', async (req, res) => {
     const board = await con.query("SELECT * from boards WHERE id = ? LIMIT 1", [req.params.id]);
     const tasks = await con.query("SELECT * from tasks WHERE board_id = ?", [req.params.id]);
@@ -173,7 +184,8 @@ app.post('/boards', async (req, res) => {
             "error": "title missing"
         });
     }
-    let sql = `INSERT INTO
+    let sql = 
+                `INSERT INTO
                     boards
                 SET
                     title = ?,

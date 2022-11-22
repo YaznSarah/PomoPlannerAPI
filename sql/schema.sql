@@ -53,7 +53,7 @@ CREATE TABLE planner.comments (
   `description` varchar(250) DEFAULT NULL,
   `cdate` date DEFAULT NULL,
   `blogid` int(10) unsigned DEFAULT NULL,
-  `posted_by` varchar(45) DEFAULT NULL,
+  `posted_by` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`commentid`),
   KEY `comments_ibfk_1` (`blogid`),
   KEY `comments_ibfk_2` (`posted_by`),
