@@ -172,8 +172,8 @@ app.post('/comments', async (req, res) => {
                     description = ?,
                     posted_by = ?,
                     cdate = NOW(),
-                    blogid = ?,`;
-    const values = [req.body.sentiment, req.body.description, req.body.postedBy, req.body.blogid]
+                    blogid = ?`;
+    const values = [req.body.sentiment, req.body.description, req.body.posted_by, req.body.blogid]
     const result = await con.query(sql, values)
     res.json(req.body)
  });
