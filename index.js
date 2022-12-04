@@ -139,6 +139,22 @@ app.post('/tasks', async (req, res) => {
 });
 
 app.post('/blogs', async (req, res) => {
+    let selectSQL = 
+                `SELECT 
+                    count(*) AS total 
+                FROM 
+                    blogs
+                WHERE 
+                    pdate > NOW() - INTERVAL 1 DAY
+                AND 
+                    created_by = ?`;
+    user = req.body.created_by
+    blogsPostedToday = await con.query(selectSQL, user)
+    if(blogsPostedToday.length > 0 && blogsPostedToday[0].total >= 2){
+        return res.status(400).json({
+            "error": "Maximum POST limit per user reached"
+        })
+    };
      let sql = `INSERT INTO
                     blogs
                 SET
