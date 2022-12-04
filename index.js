@@ -164,6 +164,19 @@ app.post('/blogs', async (req, res) => {
                     pdate  = NOW()`;
     const values = [req.body.subject, req.body.description, req.body.created_by];
     const result = await con.query(sql, values)
+    req.body.blogid = result.insertId;
+    for(let tag of req.body.tags){
+        let sql = 
+        `INSERT INTO 
+            blogstags
+        SET
+            blogid = ?,
+            tag = ?`;
+    
+        let tagValues = [result.insertId, tag]
+        await con.query(sql, tagValues)
+    }
+
     res.json(req.body)
 });
 
@@ -179,7 +192,46 @@ app.post('/blogstags', async (req, res) => {
    res.json(req.body)
 });
 
+
 app.post('/comments', async (req, res) => {
+
+    let blogSelect = 
+        `SELECT 
+            created_by
+        FROM 
+            blogs
+        WHERE 
+            blogid = ?`;
+    
+    const blogInfo = await con.query(blogSelect, [req.body.blogid]);
+    if(blogInfo.length == 0 || blogInfo[0].created_by == req.body.posted_by){
+        return res.status(400).json({
+            "error": "User cannot comment on a blog they posted"
+        });
+    }
+
+    let selectSQL = 
+            `SELECT 
+                blogid, count(*) AS total
+            FROM 
+                comments
+            WHERE 
+                cdate > NOW() - INTERVAL 1 DAY 
+            AND 
+                posted_by = ?
+            GROUP BY
+                blogid`;
+    user = req.body.posted_by
+    commentsPostedToday = await con.query(selectSQL, [user])
+    let totalPosts = 0;
+    for(let row of commentsPostedToday){
+        totalPosts+= row['total'];
+        if(row['blogid'] == req.body.blogid){
+            return res.status(400).json({
+                "error": "Already posted to this blog"
+            });
+        }
+    }
     let sql = 
                 `INSERT INTO 
                     comments
