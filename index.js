@@ -232,6 +232,13 @@ app.post('/comments', async (req, res) => {
             });
         }
     }
+
+    if(totalPosts >= 3){
+        return res.status(400).json({
+            "error": "User has already posted 3 times in the past 24 hours"
+        });
+    }
+
     let sql = 
                 `INSERT INTO 
                     comments
