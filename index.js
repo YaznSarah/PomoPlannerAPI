@@ -305,4 +305,78 @@ app.get('/initialize', (req, res) => {
     );
 });
 
+// List all the blogs of user X, such that all the comments are positive for these blogs. 
+app.post('/getblogs', async (req, res) => {
+    let sql =  `SELECT DISTINCT * FROM 
+                    blogs b 
+                JOIN comments c ON b.blogid = c.blogid 
+                WHERE b.created_by = ? AND c.sentiment = 'positive'`;
+    const rows = await con.query(sql, [req.body.user]);
+    res.json(rows);
+});
+
+// List the users who posted the most number of comments; if there is a tie, list all the users who have a tie
+app.get('/usermostcomments', async (req, res) => {
+    let sql = `SELECT 
+                    posted_by
+                FROM     
+                    comments
+	            GROUP BY 
+                    posted_by
+	            HAVING COUNT(*) = (SELECT COUNT(*) FROM comments GROUP BY posted_by ORDER BY COUNT(*) DESC LIMIT 1)`;
+    const result = await con.query(sql)
+    res.json(result);
+});
+
+// List the users who are followed by both users X and Y. Usernames X and Y are inputs from the user. 
+app.post('/follows', async (req, res) => {
+    let sql = `SELECT leadername, count(*) as followers 
+                FROM
+                    follows
+                WHERE 
+                    followername IN (?, ?) 
+                GROUP BY leadername HAVING followers = 2`;
+    const result = await con.query(sql, [req.body.userX, req.body.userY]);
+    res.json(result);
+});
+
+// Display all the users who never posted a blog. 
+app.get('/usernoblog', async (req, res) => {
+    let sql = `SELECT username FROM 
+                    user
+                WHERE  
+                     username 
+                NOT IN (SELECT created_by FROM blogs)`;
+    const result = await con.query(sql)
+    res.json(result);
+});
+
+// Display those users such that all the blogs they posted so far never received any negative comments.
+app.get('/goodusers', async (req, res) => {
+    let sql = `SELECT 
+                    username 
+                FROM
+                    user 
+                WHERE 
+                    username 
+                NOT IN (SELECT created_by FROM blogs WHERE blogid IN (SELECT blogid FROM comments WHERE sentiment = 'negative'))`;
+    const result = await con.query(sql)
+    res.json(result);
+});
+
+// List the (pair of) users with same hobby. In each row, you have to display both users as well as the common hobby. 
+app.get('/hobbies', async (req, res) => {
+    let sql = `SELECT
+	                h1.username as userA, 
+                    h2.username as userB, 
+                    h1.hobby as SharedHobby
+                FROM 
+	                hobbies h1, hobbies h2
+                WHERE
+	                h1.hobby = h2.hobby
+                AND 
+	                h1.username < h2.username`;
+    const result = await con.query(sql);
+    res.json(result);
+});
 const server = app.listen(port);
