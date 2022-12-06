@@ -61,3 +61,20 @@ CREATE TABLE planner.comments (
   CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`posted_by`) REFERENCES planner.user(`username`),
   CONSTRAINT `sentiment_types` CHECK ((`sentiment` in (_utf8mb4'negative',_utf8mb4'positive')))
 );
+
+CREATE TABLE planner.follows (
+  `leadername` varchar(255) NOT NULL,
+  `followername` varchar(255) NOT NULL,
+  PRIMARY KEY (`leadername`,`followername`),
+  KEY `follows_ibfk_2` (`followername`),
+  CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`leadername`) REFERENCES planner.user(`username`),
+  CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`followername`) REFERENCES planner.user(`username`)
+);
+
+CREATE TABLE planner.hobbies (
+  `username` varchar(255)  NOT NULL,
+  `hobby` varchar(20) NOT NULL,
+  PRIMARY KEY (`hobby`,`username`),
+  KEY `hobbies_ibfk_1` (`username`),
+  CONSTRAINT `hobbies_ibfk_1` FOREIGN KEY (`username`) REFERENCES planner.user(`username`)
+);
